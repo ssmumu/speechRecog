@@ -79,6 +79,17 @@
     background-color:transparent;
     padding: 0;
   }
+  #review {
+    width: 100px;
+    height: 50px;
+   
+    position: absolute;
+    border-radius: 10px;
+    background-color: #80ced6;
+    color: white;
+    text-align: center;
+    line-height: 50px;
+  }
 </style>
 <h1 class="center" id="headline">
   <a href="http://dvcs.w3.org/hg/speech-api/raw-file/tip/speechapi.html">
@@ -132,6 +143,8 @@
     &nbsp;&nbsp;
     <select id="select_dialect"></select>
   </div>
+  <div id = "clockk"></div>
+  <div id = "review" style = "visibility: hidden;"></div> 
 </div>
 <script>
 var langs =
@@ -222,6 +235,45 @@ var final_transcript = '';
 var recognizing = false;
 var ignore_onend;
 var start_timestamp;
+
+//----------------------------------------
+//setting a timer
+var clockk;
+var clk = 0;
+function setclock(){
+  document.getElementById("clockk").innerHTML = ++clk;
+}
+var viewreview;
+function viewRvw(){
+  document.getElementById("review").innerHTML = '';
+  document.getElementById("review").style.visibility = "hidden";  
+}
+
+//------------------TASK1:Speech Speed Detection and Feedback--------
+var partial_transcript = '';
+var timeriD;
+function detectSpeechSpeed(){
+  document.getElementById("review").style.visibility = "visible";  
+  var speed = partial_transcript.split(' ').length;
+  if(speed == 1){
+     document.getElementById("review").innerHTML = "Breathe!";console.log("---here in timer: "+partial_transcript+speed+" no pause");
+  }
+  else if(speed < (133/60*5)){
+    document.getElementById("review").innerHTML = "Too Slow!";console.log("---here in timer: "+partial_transcript+speed+" slow"+clk);
+  }
+  else if(speed > (188/60*5)){
+    document.getElementById("review").innerHTML = "Too fast!";console.log("---here in timer: "+partial_transcript+speed+" fast"+clk);
+  }
+  else{
+     document.getElementById("review").innerHTML = "Speed OK!";console.log("---here in timer: "+partial_transcript+speed+" ok"+clk);
+  }
+  partial_transcript = '';
+  return;
+}
+//---------------------------------------------
+
+
+
 if (!('webkitSpeechRecognition' in window)) {
   upgrade();
 } else {
@@ -232,6 +284,9 @@ if (!('webkitSpeechRecognition' in window)) {
 
   recognition.onstart = function() {
     recognizing = true;
+    clockk = setInterval(setclock,1000);
+    timeriD = setInterval(detectSpeechSpeed, 5000); //starting timerid
+    viewreview = setInterval(viewRvw, clk*1000+3000);  
     showInfo('info_speak_now');
     start_img.src = 'mic-animate.gif';
   };
@@ -259,6 +314,13 @@ if (!('webkitSpeechRecognition' in window)) {
 
   recognition.onend = function() {
     recognizing = false;
+    clearInterval(timeriD); //resetting timerid
+    clk = 0;
+    clearInterval(clockk);  //resetting clock
+    clearInterval(viewreview);
+    document.getElementById("review").style.visibility = "hidden"; //resetting feedback property
+    document.getElementById("clockk").innerHTML = '';
+    console.log("--stopped--");
     if (ignore_onend) {
       return;
     }
@@ -280,17 +342,20 @@ if (!('webkitSpeechRecognition' in window)) {
     }
   };
 
+
+
   recognition.onresult = function(event) {
     var interim_transcript = '';
     for (var i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
         final_transcript += event.results[i][0].transcript;
+        partial_transcript += event.results[i][0].transcript;  //store partial speech
       } else {
         interim_transcript += event.results[i][0].transcript;
       }
     }
     final_transcript = capitalize(final_transcript);
-    console.log("printing: "+final_transcript)
+    console.log("printinggg: "+partial_transcript);
     final_span.innerHTML = linebreak(final_transcript);
     interim_span.innerHTML = linebreak(interim_transcript);
     if (final_transcript || interim_transcript) {
@@ -298,6 +363,9 @@ if (!('webkitSpeechRecognition' in window)) {
     }
   };
 }
+
+
+
 
 function upgrade() {
   start_button.style.visibility = 'hidden';
