@@ -436,7 +436,7 @@ if (!('webkitSpeechRecognition' in window)) {
       }
     }
     final_transcript = capitalize(final_transcript);
-    console.log("printinggg: "+final_transcript+task);
+    console.log("printinggg: "+partial_transcript);
     if(task == 3){
       var textsaid = partial_transcript;
       partial_transcript = '';
@@ -642,7 +642,7 @@ button.addEventListener('click', function(e) {
   
   if(count == 0){
     agenttalk  = "Hello, how can I help you?";
-    document.getElementById("speechmsg").innerHTML = "Each time, say command and press \"Augmented Agent\". Say \"show option or menu\" to anytime to go back to menu. Say \"exit\" to this augmented agent option";
+    document.getElementById("speechmsg").innerHTML = "Each time, say command and press \"Automated Agent\". Say \"show option or menu\" to anytime to go back to menu. Say \"exit\" to this automated agent option";
   }
   else if(partial_transcript.includes("exit")){
     agenttalk = "Thank you for using the service"
