@@ -82,7 +82,6 @@
   #review {
     width: 100px;
     height: 50px;
-   
     position: absolute;
     border-radius: 10px;
     background-color: #80ced6;
@@ -90,6 +89,24 @@
     text-align: center;
     line-height: 50px;
   }
+  .mybutton {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .mybutton:focus{
+    background-color: #deeaee;
+    color: black;
+  }
+
 </style>
 <h1 class="center" id="headline">
   <a href="http://dvcs.w3.org/hg/speech-api/raw-file/tip/speechapi.html">
@@ -145,6 +162,11 @@
   </div>
   <div id = "clockk"></div>
   <div id = "review" style = "visibility: hidden;"></div> 
+  <div id = "menutask" style = "visibility: visible; float: right; position: relative;" >
+    <button id="task1" class = "mybutton" onclick="task1()">Speech Rate</button><br>
+    <button id="task2"  class = "mybutton" onclick="task2()">Automated Agent</button><br>
+    <button id="task3" class = "mybutton" onclick="task3()">OK Google</button><br>
+  </div>
 </div>
 <script>
 var langs =
@@ -235,7 +257,17 @@ var final_transcript = '';
 var recognizing = false;
 var ignore_onend;
 var start_timestamp;
-
+//--------------------init--------------------
+var task;
+function task1(){
+  task = 1;
+}
+function task2(){
+  task = 2;
+}
+function task3(){
+  task = 3;
+}
 //----------------------------------------
 //setting a timer
 var clockk;
@@ -284,9 +316,11 @@ if (!('webkitSpeechRecognition' in window)) {
 
   recognition.onstart = function() {
     recognizing = true;
-    clockk = setInterval(setclock,1000);
-    timeriD = setInterval(detectSpeechSpeed, 5000); //starting timerid
-    viewreview = setInterval(viewRvw, clk*1000+3000);  
+    if(task==1){
+      clockk = setInterval(setclock,1000);
+      timeriD = setInterval(detectSpeechSpeed, 5000); //starting timerid
+      viewreview = setInterval(viewRvw, clk*1000+3000);  
+    }
     showInfo('info_speak_now');
     start_img.src = 'mic-animate.gif';
   };
@@ -314,12 +348,16 @@ if (!('webkitSpeechRecognition' in window)) {
 
   recognition.onend = function() {
     recognizing = false;
-    clearInterval(timeriD); //resetting timerid
-    clk = 0;
-    clearInterval(clockk);  //resetting clock
-    clearInterval(viewreview);
-    document.getElementById("review").style.visibility = "hidden"; //resetting feedback property
-    document.getElementById("clockk").innerHTML = '';
+    if(task ==1){
+      clearInterval(timeriD); //resetting timerid
+      clk = 0;
+      clearInterval(clockk);  //resetting clock
+      clearInterval(viewreview);
+      document.getElementById("review").style.visibility = "hidden"; //resetting feedback property
+      document.getElementById("clockk").innerHTML = '';
+      document.getElementById("review").innerHTML = '';
+    }
+    partial_transcript = ''; 
     console.log("--stopped--");
     if (ignore_onend) {
       return;
