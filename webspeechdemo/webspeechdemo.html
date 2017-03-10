@@ -89,6 +89,15 @@
     text-align: center;
     line-height: 50px;
   }
+  .infoblock {
+    background-color: blue;
+    width: 150px;
+    height: 75px;
+    align-content: center;
+    margin: 10px 50px 0px 20px;
+
+
+  }
   .mybutton {
     background-color: #4CAF50;
     border: none;
@@ -106,11 +115,13 @@
     background-color: #deeaee;
     color: black;
   }
+ 
 
 </style>
 <h1 class="center" id="headline">
   <a href="http://dvcs.w3.org/hg/speech-api/raw-file/tip/speechapi.html">
     Web Speech API</a> Demonstration</h1>
+  <p style="align-content: center; text-align: center;"> ***<strong>Use option:</strong> 1. Click an option button 2. Click on mic icon 3. Do stuff ------ <strong>To switch:</strong> 1. Click on mic icon to end 2. Choose another button***</p>
 <div id="info">
   <p id="info_start">Click on the microphone icon and begin speaking.</p>
   <p id="info_speak_now">Speak now.</p>
@@ -162,6 +173,7 @@
   </div>
   <div id = "clockk"></div>
   <div id = "review" style = "visibility: hidden;"></div> 
+  <div id = "speechmsg">instruction</div>
   <div id = "menutask" style = "visibility: visible; float: right; position: relative;" >
     <button id="task1" class = "mybutton" onclick="task1()">Speech Rate</button><br>
     <button id="task2"  class = "mybutton" onclick="task2()">Automated Agent</button><br>
@@ -258,20 +270,46 @@ var recognizing = false;
 var ignore_onend;
 var start_timestamp;
 //--------------------init--------------------
+
+var count = 0;
+var techsup = 0;
+var acc = 0;
+var prod = 0;
+var acc1= 0;
+var acc2 = 0;
+var clockk;
+var clk = 0;
+
+
 var task;
 function task1(){
   task = 1;
+  acc = 0;
+  techsup = 0;
+  prod = 0;
+  count = 0;
+
 }
 function task2(){
   task = 2;
+  clk = 0;
+  document.getElementById("speechmsg").innerHTML = "Speak and then press \"Automated Agent\" button";
+
 }
 function task3(){
   task = 3;
+  acc = 0;
+  techsup = 0;
+  prod = 0;
+  count = 0;
+  clk = 0;
+  startButton(event);
+  document.getElementById("speechmsg").innerHTML = "Press mic image, then say what to search, then say ok google";
+
 }
 //----------------------------------------
 //setting a timer
-var clockk;
-var clk = 0;
+
 function setclock(){
   document.getElementById("clockk").innerHTML = ++clk;
 }
@@ -302,6 +340,10 @@ function detectSpeechSpeed(){
   partial_transcript = '';
   return;
 }
+//---------------------------------------------
+
+
+
 //---------------------------------------------
 
 
@@ -357,6 +399,9 @@ if (!('webkitSpeechRecognition' in window)) {
       document.getElementById("clockk").innerHTML = '';
       document.getElementById("review").innerHTML = '';
     }
+    if(task ==3){
+      startButton(event);
+    }
     partial_transcript = ''; 
     console.log("--stopped--");
     if (ignore_onend) {
@@ -393,7 +438,21 @@ if (!('webkitSpeechRecognition' in window)) {
       }
     }
     final_transcript = capitalize(final_transcript);
-    console.log("printinggg: "+partial_transcript);
+    console.log("printinggg: "+final_transcript+task);
+    if(task == 3){
+      var textsaid = partial_transcript;
+      partial_transcript = '';
+     // textsaid.replace("Okay", 'okay');
+     // textsaid.replace("Google",'google');
+     // console.log("replace: "+textsaid);
+      if(textsaid.includes('okay Google') || textsaid.includes('Okay Google')){
+        console.log("if yes: "+textsaid);
+        textsaid.replace("Okay", 'okay');
+        var said = textsaid.split('okay Google');
+        console.log("ok googleee: "+said);
+        window.open('http://google.com/search?q='+said);
+      }
+    }
     final_span.innerHTML = linebreak(final_transcript);
     interim_span.innerHTML = linebreak(interim_transcript);
     if (final_transcript || interim_transcript) {
@@ -495,4 +554,260 @@ function showButtons(style) {
   copy_info.style.display = 'none';
   email_info.style.display = 'none';
 }
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Get the 'speak' button
+
+
+//var partial_tra = document.currentScript.getAttribute('partial_transcript');
+var agenttalk="hi";
+
+
+var button = document.getElementById('task2');
+
+// Get the text input element.
+var speechMsgInput = agenttalk;
+//var speechMsgInput = speechmsg;
+
+// Get the voice select element.
+//var voiceSelect = document.getElementById('voice');
+var voiceSelect = "Google US English";
+
+// Get the attribute controls.
+//var volumeInput = document.getElementById('volume');
+var volumeInput = 1;
+//var rateInput = document.getElementById('rate');
+var rateInput = 0.8;
+//var pitchInput = document.getElementById('pitch');
+var pitchInput = 1.2;
+
+// Fetch the list of voices and populate the voice options.
+function loadVoices() {
+  // Fetch the available voices.
+  var voices = speechSynthesis.getVoices();
+  
+  // Loop through each of the voices.
+  voices.forEach(function(voice, i) {
+    // Create a new option element.
+    var option = document.createElement('option');
+    
+    // Set the options value and text.
+    option.value = voice.name;
+    option.innerHTML = voice.name;
+      
+    // Add the option to the voice selector.
+    voiceSelect.appendChild(option);
+  });
+}
+
+console.log(count+"  "+button+"  "+speechMsgInput+ "   "+voiceSelect+ "   "+volumeInput+"  "+ rateInput+ "  "+pitchInput);
+
+// Execute loadVoices.
+//loadVoices();
+
+// Chrome loads voices asynchronously.
+window.speechSynthesis.onvoiceschanged = function(e) {
+ // loadVoices();
+};
+
+
+// Create a new utterance for the specified text and add it to
+// the queue.
+function speak(text) {
+  // Create a new instance of SpeechSynthesisUtterance.
+  var msg = new SpeechSynthesisUtterance();
+  
+  // Set the text.
+  msg.text = text;
+  
+  // Set the attributes.
+  msg.volume = parseFloat(volumeInput);
+  msg.rate = parseFloat(rateInput);
+  msg.pitch = parseFloat(pitchInput);
+  
+  // If a voice has been selected, find the voice and set the
+  // utterance instance's voice attribute.
+  if (voiceSelect) {
+    msg.voice = speechSynthesis.getVoices().filter(function(voice) { return voice.name == voiceSelect; })[0];
+  }
+  
+  // Queue this utterance.
+  window.speechSynthesis.speak(msg);
+}
+
+
+// Set up an event listener for when the 'speak' button is clicked.
+//button.addEventListener('click', function(e) {
+button.addEventListener('click', function(e) {
+  document.getElementById("speechmsg").innerHTML = "Say command and then press \"Augmented Agent\" button";
+  if(count == 0){
+    agenttalk  = "Hello, how can I help you?";
+    document.getElementById("speechmsg").innerHTML = "Say \"show options\"";
+  }
+  else if (partial_transcript.includes("option") || partial_transcript.includes("menu")){
+    acc = 0;
+    prod = 0;
+    techsup = 0;
+    agenttalk = "You can get account information, product information or tech support."
+    document.getElementById("speechmsg").innerHTML = "Say account information, tech support or product information";
+  }
+  else if(partial_transcript.includes("support") && techsup==0) {
+    agenttalk  = "please briefly describe your problem";
+    document.getElementById("speechmsg").innerHTML = "Say something";
+    techsup++;
+    acc = 0;
+    prod = 0;
+  }
+  else if(techsup == 1) {
+    agenttalk  = "have you tried turning it on and off?";
+    document.getElementById("speechmsg").innerHTML = "Say yes or no";
+    techsup++;
+    acc = 0;
+    prod = 0;
+  }
+  else if(partial_transcript.includes("yes") && techsup == 2){
+    agenttalk = "We will connect you to the next available technical agent";
+    document.getElementById("speechmsg").innerHTML = "press agent button";
+    techsup  = 100;
+    acc = 0;
+    prod = 0;
+  }
+  else if(partial_transcript.includes("no") && techsup == 2){
+    agenttalk = "Try turning it on and off. Did it work?";
+    document.getElementById("speechmsg").innerHTML = "Say yes or no";
+    techsup++;
+  }
+  else if (partial_transcript.includes("yes") && techsup == 3){
+    agenttalk = "I\'m glad I could help. Have a good day.";
+    document.getElementById("speechmsg").innerHTML = "Press agent button";
+    techsup = 100;
+  }
+  else if (partial_transcript.includes("no") && techsup == 3){
+    agenttalk = "We will connect you to the next available technical agent";
+    document.getElementById("speechmsg").innerHTML = "Press agent button";
+    techsup = 100;
+  }
+  else if(partial_transcript.includes("account") && acc ==0){
+    agenttalk = "You can check balance and then pay, or, directly pay balance";
+    document.getElementById("speechmsg").innerHTML = "Say check balance and/or pay balance";
+    techsup = 0;
+    prod = 0;
+    acc++;
+
+  }
+  else if(partial_transcript.includes("check") && acc == 1){
+    agenttalk = "Your balance is 1000 dollars, proceed to pay balance";
+    document.getElementById("speechmsg").innerHTML = "Say \"Pay Balance\"";
+    techsup = 0;
+    prod = 0;
+    acc=20;
+  }
+  else if(partial_transcript.includes("pay") && (acc ==1 || acc ==20)){
+    agenttalk = "Ready to pay balance";
+    document.getElementById("speechmsg").innerHTML = "Say \"payment process\"";
+    techsup = 0;
+    prod = 0;
+    acc=21;
+  }
+  else if(partial_transcript.includes("process") && (acc ==21)){
+    agenttalk = "Provide credit card number";
+    document.getElementById("speechmsg").innerHTML = "Say 12 digit number";
+    techsup = 0;
+    prod = 0;
+    acc=10;
+  }
+  else if(acc == 10){
+    var nums = partial_transcript.split(' ');
+    var i = 0;
+    var err = 0;
+    for(i=0;i<12;i++){
+      if(nums[i]=="one")nums[i]="1";else if(nums[i]=="two")nums[i]="2"; else if(nums[i]=="three")nums[i]="3"; else if(nums[i]=="four")nums[i]="4"; else if(nums[i]=="five")nums[i]="5"; else if(nums[i]=="six")nums[i]="6"; else if(nums[i]=="7")nums[i]="7"; else if(nums[i]=="eight")nums[i]="8"; else if(nums[i]=="nine")nums[i]="9";else {err = 1; break;}
+    }
+    
+    agenttalk = "Provide card expiration date: Date-Month";
+    document.getElementById("speechmsg").innerHTML = "Say first january";
+    if(err == 1){agenttalk = "Wrong credit card number."; document.getElementById("speechmsg").innerHTML = "Say \"credit 12 digit card number\""; acc = 10;}
+    else {
+      techsup = 0;
+      prod = 0;
+      acc++;
+    }
+  }
+  else if(acc == 11 && (partial_transcript.includes("january") || partial_transcript.includes("february") || partial_transcript.includes("march") || partial_transcript.includes("april") || partial_transcript.includes("may") || partial_transcript.includes("june") || partial_transcript.includes("july") || partial_transcript.includes("august") || partial_transcript.includes("september") || partial_transcript.includes("october") || partial_transcript.includes("november") || partial_transcript.includes("december"))){
+    agenttalk = "Provide security code";
+    document.getElementById("speechmsg").innerHTML = "Say 3 digit number";
+    techsup = 0;
+    prod = 0;
+    acc++;
+  }
+  else if(acc == 12){
+    var i =0;
+    var err =0;
+    for(i=0;i<3;i++){
+      if(nums[i]=="one")nums[i]="1";else if(nums[i]=="two")nums[i]="2"; else if(nums[i]=="three")nums[i]="3"; else if(nums[i]=="four")nums[i]="4"; else if(nums[i]=="five")nums[i]="5"; else if(nums[i]=="six")nums[i]="6"; else if(nums[i]=="7")nums[i]="7"; else if(nums[i]=="eight")nums[i]="8"; else if(nums[i]=="nine")nums[i]="9";else {err = 1; break;}
+    }
+    agenttalk = "Thank you, your payment process is complete.";
+    document.getElementById("speechmsg").innerHTML = "Click agent";
+    if(err == 1){agenttalk = "Not correct number. Say again"; document.getElementById("speechmsg").innerHTML = "Say \"payment process\""; acc = 12;}
+    else {
+      techsup = 0;
+      prod = 0;
+      acc = 0;
+    }
+  }
+  else if(partial_transcript.includes("product") && prod ==0){
+    agenttalk = "We have computer and phone. Would you like to purchase any of those?";
+    document.getElementById("speechmsg").innerHTML = "Say computer or phone or something else";
+    techsup = 0;
+    acc = 0;
+    prod++;
+  }
+  else if(prod ==1){
+    if(partial_transcript.includes("computer") || partial_transcript.includes("phone")){
+      agenttalk = "Great, move to payment process";
+      document.getElementById("speechmsg").innerHTML = "Say payment process";
+      techsup = 0;
+      prod = 0;
+      acc = 21;
+    }
+    else{
+      agenttalk = "We don't have that, try another one";
+      document.getElementById("speechmsg").innerHTML = "Say computer or phone or something else";
+      techsup = 0;
+      acc = 0;
+      prod=1;
+    }
+    
+  }
+  else if (techsup == 100){
+    agenttalk = "Thank you for using the service"
+    document.getElementById("speechmsg").innerHTML = "Say \"show menu\" to see menu";
+    acc = 0;
+    prod = 0;
+    techsup = 0;
+  }
+  else
+  {
+    agenttalk = "sorry i didn\'t get you";
+    acc = 0;
+    techsup = 0;
+    prod = 0;
+    document.getElementById("speechmsg").innerHTML = "Say account information, tech support or product information";
+  }
+
+  console.log("pressed");
+  count++;
+  partial_transcript  = '';
+  if (agenttalk.length > 0) {
+    console.log(agenttalk+ "   "+voiceSelect+ "   "+volumeInput+"  "+ rateInput+ "  "+pitchInput);
+    speak(agenttalk);
+  }
+});
+//});
+
+
+
 </script>
+
