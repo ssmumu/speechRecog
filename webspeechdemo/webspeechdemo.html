@@ -121,7 +121,7 @@
 <h1 class="center" id="headline">
   <a href="http://dvcs.w3.org/hg/speech-api/raw-file/tip/speechapi.html">
     Web Speech API</a> Demonstration</h1>
-  <p style="align-content: center; text-align: center;"> ***<strong>Use option:</strong> 1. Click an option button 2. Click on mic icon 3. Do stuff ------ <strong>To switch:</strong> 1. Click on mic icon to end 2. Choose another button***</p>
+  <p style="align-content: center; text-align: center;"> ***<strong>Use option:</strong> 1. Click an option button, 2. Click on mic icon, 3. Do stuff ------ <strong>To switch:</strong> 1. Click on mic icon to end, 2. Choose another button***</p>
 <div id="info">
   <p id="info_start">Click on the microphone icon and begin speaking.</p>
   <p id="info_speak_now">Speak now.</p>
@@ -173,8 +173,8 @@
   </div>
   <div id = "clockk"></div>
   <div id = "review" style = "visibility: hidden;"></div> 
-  <div id = "speechmsg">instruction</div>
-  <div id = "menutask" style = "visibility: visible; float: right; position: relative;" >
+  <div id = "speechmsg"></div>
+  <div id = "menutask" style = "visibility: visible; float: right; position: relative;" >Options<br>
     <button id="task1" class = "mybutton" onclick="task1()">Speech Rate</button><br>
     <button id="task2"  class = "mybutton" onclick="task2()">Automated Agent</button><br>
     <button id="task3" class = "mybutton" onclick="task3()">OK Google</button><br>
@@ -361,7 +361,7 @@ if (!('webkitSpeechRecognition' in window)) {
     if(task==1){
       clockk = setInterval(setclock,1000);
       timeriD = setInterval(detectSpeechSpeed, 5000); //starting timerid
-      viewreview = setInterval(viewRvw, clk*1000+3000);  
+      viewreview = setInterval(viewRvw, clk*5000+3000);  
     }
     showInfo('info_speak_now');
     start_img.src = 'mic-animate.gif';
@@ -399,9 +399,7 @@ if (!('webkitSpeechRecognition' in window)) {
       document.getElementById("clockk").innerHTML = '';
       document.getElementById("review").innerHTML = '';
     }
-    if(task ==3){
-      startButton(event);
-    }
+   
     partial_transcript = ''; 
     console.log("--stopped--");
     if (ignore_onend) {
@@ -446,7 +444,7 @@ if (!('webkitSpeechRecognition' in window)) {
      // textsaid.replace("Google",'google');
      // console.log("replace: "+textsaid);
       if(textsaid.includes('okay Google') || textsaid.includes('Okay Google')){
-        console.log("if yes: "+textsaid);
+       // console.log("if yes: "+textsaid);
         textsaid.replace("Okay", 'okay');
         var said = textsaid.split('okay Google');
         console.log("ok googleee: "+said);
@@ -641,10 +639,17 @@ function speak(text) {
 // Set up an event listener for when the 'speak' button is clicked.
 //button.addEventListener('click', function(e) {
 button.addEventListener('click', function(e) {
-  document.getElementById("speechmsg").innerHTML = "Say command and then press \"Augmented Agent\" button";
+  
   if(count == 0){
     agenttalk  = "Hello, how can I help you?";
-    document.getElementById("speechmsg").innerHTML = "Say \"show options\"";
+    document.getElementById("speechmsg").innerHTML = "Each time, say command and press \"Augmented Agent\". Say \"show option or menu\" to anytime to go back to menu. Say \"exit\" to this augmented agent option";
+  }
+  else if(partial_transcript.includes("exit")){
+    agenttalk = "Thank you for using the service"
+    document.getElementById("speechmsg").innerHTML = "Press mic icon and then choose another option";
+    acc = 0;
+    prod = 0;
+    techsup = 0;
   }
   else if (partial_transcript.includes("option") || partial_transcript.includes("menu")){
     acc = 0;
